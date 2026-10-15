@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>ShopKart Auth — Test Client</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 480px; margin: 40px auto; padding: 0 16px; }
+  h1 { font-size: 20px; }
+  section { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+  h2 { font-size: 15px; margin-top: 0; }
+  input { display: block; width: 100%; padding: 8px; margin-bottom: 8px; box-sizing: border-box; }
+  button { padding: 8px 14px; cursor: pointer; }
+  pre { background: #f4f4f4; padding: 10px; border-radius: 6px; white-space: pre-wrap; word-break: break-word; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<h1>ShopKart Auth — Test Client</h1>
+<p>This is just a debug page for hitting your own API — not part of the real assignment. It only works because this page is served by the same server (so cookies work normally).</p>
+
+<section>
+  <h2>Register</h2>
+  <input id="reg-name" placeholder="Full name" value="Jane Doe" />
+  <input id="reg-email" placeholder="Email" value="jane@example.com" />
+  <input id="reg-password" placeholder="Password" value="password123" />
+  <input id="reg-phone" placeholder="Phone" value="9876543210" />
+  <button onclick="register()">Register</button>
+</section>
+
+<section>
+  <h2>Login</h2>
+  <input id="login-email" placeholder="Email" value="jane@example.com" />
+  <input id="login-password" placeholder="Password" value="password123" />
+  <button onclick="login()">Login</button>
+</section>
+
+<section>
+  <h2>Profile</h2>
+  <button onclick="getProfile()">Who am I? (GET /customers/me)</button>
+</section>
+
+<section>
+  <h2>Logout</h2>
+  <button onclick="logout()">Logout</button>
+</section>
+
+<h2>Response</h2>
+<pre id="output">Results will show up here.</pre>
+
+<script>
+  const output = document.getElementById('output');
+
+  function show(data) {
+    output.textContent = JSON.stringify(data, null, 2);
+  }
+
+  // credentials: 'include' tells fetch to send/receive cookies —
+  // required for the HttpOnly auth cookie to work.
+  async function callApi(url, method, body) {
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await res.json();
+      show({ status: res.status, ...data });
+    } catch (err) {
+      show({ error: err.message });
+    }
+  }
+
+  function register() {
+    callApi('/customers/register', 'POST', {
+      fullName: document.getElementById('reg-name').value,
+      email: document.getElementById('reg-email').value,
+      password: document.getElementById('reg-password').value,
+      phone: document.getElementById('reg-phone').value,
+    });
+  }
+
+  function login() {
+    callApi('/customers/login', 'POST', {
+      email: document.getElementById('login-email').value,
+      password: document.getElementById('login-password').value,
+    });
+  }
+
+  function getProfile() {
+    callApi('/customers/me', 'GET');
+  }
+
+  function logout() {
+    callApi('/customers/logout', 'POST');
+  }
+</script>
+
+</body>
+</html>
